@@ -1,0 +1,15 @@
+# < Multi > ##
+FROM denoland/deno:1.26.0 AS base
+WORKDIR /app
+USER deno
+FROM base AS requirements
+COPY server.ts .
+RUN deno cache server.ts
+COPY . .
+FROM requirements AS build  
+WORKDIR /app
+FROM denoland/deno:alpine-1.10.3 AS release  
+WORKDIR /app
+COPY --from=requirements /app/server.ts ./
+EXPOSE 8000
+CMD ["run", "--allow-read", "--allow-net", "server.ts"]  
